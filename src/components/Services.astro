@@ -1,0 +1,180 @@
+---
+const categories = [
+	{
+		id: 1,
+		title: "Tipografía",
+		bgColor: "bg-white",
+		textColor: "text-black",
+		description:
+			"Selección y diseño de fuentes que comunican la identidad de tu marca con claridad y estilo.",
+	},
+	{
+		id: 2,
+		title: "Diseño gráfico",
+		bgColor: "bg-[#a9deff]",
+		textColor: "text-black",
+		description:
+			"Creación de elementos visuales impactantes que capturan la esencia de tu mensaje.",
+	},
+	{
+		id: 3,
+		title: "Animación",
+		bgColor: "bg-[#488de8]",
+		textColor: "text-white",
+		description:
+			"Movimiento que da vida a tus ideas, desde micro-interacciones hasta narrativas complejas.",
+	},
+	{
+		id: 4,
+		title: "Edición",
+		bgColor: "bg-[#156ba8]",
+		textColor: "text-white",
+		description:
+			"Montaje profesional que asegura ritmo, coherencia y narrativa en tus producciones audiovisuales.",
+	},
+	{
+		id: 5,
+		title: "Diseño 3D",
+		bgColor: "bg-[#163848]",
+		textColor: "text-white",
+		description:
+			"Modelado y renderizado tridimensional para experiencias visuales inmersivas y realistas.",
+	},
+];
+const { id } = Astro.props;
+---
+
+<section
+	id={id}
+	class="w-full max-w-7xl mx-auto px-4 md:px-10 py-20 pb-[40vh] flex flex-col"
+>
+	{
+		categories.map((category, index) => (
+			<div
+				class={`service-card sticky ${category.bgColor} ${category.textColor} rounded-3xl p-10 md:p-16 min-h-[50vh] flex flex-col justify-between gap-10 transition-all duration-500 shadow-xl origin-top`}
+				style={`top: calc(10vh + ${index * 7}rem); margin-bottom: 6rem; z-index: ${index + 1};`}
+				data-index={index}
+			>
+				<h3 class="text-3xl md:text-4xl font-thin font-['Inter'] leading-normal">
+					0{category.id}_
+					<span class="font-normal">{category.title}</span>
+				</h3>
+				<p class="text-2xl md:text-3xl font-light font-['Inter'] leading-normal max-w-2xl">
+					{category.description}
+				</p>
+			</div>
+		))
+	}
+</section>
+
+<script>
+	const cards = document.querySelectorAll(".service-card");
+
+	function updateCards() {
+		cards.forEach((card, index) => {
+			const htmlCard = card as HTMLElement;
+			const rect = htmlCard.getBoundingClientRect();
+			const topOffset = window.innerHeight * 0.1 + index * 120; // 10vh + index * 6rem (96px)
+
+			let nextElement: HTMLElement | null = null;
+
+			// Determine the "next" element
+			if (index < cards.length - 1) {
+				nextElement = cards[index + 1] as HTMLElement;
+			} else {
+				// For the last card, use the next section (Projects)
+				nextElement = document.getElementById("projects");
+			}
+
+			// If the card is at its sticky position (or slightly above due to scroll bounce)
+			// and there is a next element
+			if (rect.top <= topOffset + 1 && nextElement) {
+				const nextRect = nextElement.getBoundingClientRect();
+				let nextTopOffset =
+					window.innerHeight * 0.1 + (index + 1) * 120;
+
+				// For the last card, we want the effect to happen as the next section enters the viewport
+				// The "sticky" position of the next section is effectively when it hits the top of the viewport?
+				// No, we want the last card to scale down as the next section covers it.
+
+				if (index === cards.length - 1) {
+					// Adjust target for last card: it should be fully scaled down when next section hits the "stacking" position
+					// which is where the next card WOULD be if it existed.
+					nextTopOffset = topOffset + 120;
+				}
+
+				// Calculate how close the next card is to its sticky position
+				// Distance from bottom of viewport or just relative to this card?
+				// Actually, we want to scale THIS card based on how much the NEXT card overlaps it.
+
+				// Distance of next card from its sticky position
+				const distance = nextRect.top - nextTopOffset;
+
+				// If next card is approaching its sticky spot (distance is decreasing)
+				// We want to scale down the current card.
+				// Let's say interaction starts when next card is 500px away?
+				// Or simply: as next card moves up, this card scales down.
+
+				// Let's use the distance between the two cards.
+				// Initial distance when next card is just below viewport is large.
+				// Final distance when next card is stacked is small (difference in top offsets).
+
+				// Simpler approach:
+				// Map the position of the next card to a scale value for the current card.
+
+				const windowHeight = window.innerHeight;
+				// When next card is at bottom of screen: scale 1
+				// When next card is at its sticky top: scale 0.95
+
+				const startEffectAt = windowHeight; // Next card entering viewport
+				const endEffectAt = nextTopOffset; // Next card at sticky pos
+
+				let progress =
+					(nextRect.top - endEffectAt) /
+					(startEffectAt - endEffectAt);
+				progress = Math.max(0, Math.min(1, progress)); // Clamp 0-1
+
+				// Invert progress: 1 means far away (scale 1), 0 means stacked (scale 0.95)
+				// Actually progress 1 (at bottom) -> scale 1
+				// Progress 0 (at top) -> scale 0.95
+
+				const scale = 0.95 + 0.05 * progress;
+				const brightness = 0.8 + 0.2 * progress; // Darken to 0.8
+
+				htmlCard.style.transform = `scale(${scale})`;
+				htmlCard.style.filter = `brightness(${brightness})`;
+			} else {
+				// Reset if not in "stacking" mode (e.g. scrolling back up or last card)
+				// But we need to be careful not to reset if it's already fully stacked (scrolled past)
+				// If we scroll way past, rect.top is still <= topOffset.
+				// And nextRect.top will be <= nextTopOffset.
+
+				// If next card is fully stacked (nextRect.top <= nextTopOffset),
+				// then this card should remain scaled down.
+				if (nextElement) {
+					const nextRect = nextElement.getBoundingClientRect();
+					const nextTopOffset =
+						window.innerHeight * 0.1 + (index + 1) * 120;
+
+					if (nextRect.top <= nextTopOffset) {
+						htmlCard.style.transform = `scale(0.95)`;
+						htmlCard.style.filter = `brightness(0.8)`;
+					} else {
+						htmlCard.style.transform = `scale(1)`;
+						htmlCard.style.filter = `brightness(1)`;
+					}
+				} else {
+					htmlCard.style.transform = `scale(1)`;
+					htmlCard.style.filter = `brightness(1)`;
+				}
+			}
+		});
+	}
+
+	window.addEventListener("scroll", () => {
+		requestAnimationFrame(updateCards);
+	});
+
+	// Initial call
+	updateCards();
+</script>

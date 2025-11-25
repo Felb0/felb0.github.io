@@ -1,0 +1,170 @@
+---
+const { id } = Astro.props;
+---
+
+<header
+	id={id}
+	class="absolute top-0 left-0 w-full h-auto bg-linear-gradient-to-t from-transparent to-black/15 flex items-center justify-center z-10 p-10 px-20"
+>
+	<div class="flex items-center justify-between w-full max-w-7xl mx-auto">
+		<h1 class="text-white text-3xl font-bold leading-normal font-['Inter']">
+			Felb0
+		</h1>
+
+		<div class="w-14 h-14 flex items-center justify-center">
+			<svg
+				width="100%"
+				height="100%"
+				viewBox="0 0 55 54"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="M27.5 0L33.75 20.25L54 13.5L40.5 27L54 40.5L33.75 33.75L27.5 54L21.25 33.75L1 40.5L14.5 27L1 13.5L21.25 20.25L27.5 0Z"
+					fill="white"></path>
+			</svg>
+		</div>
+	</div>
+
+	<!-- Fixed navigation menu (outside flex container) -->
+	<nav
+		class="fixed top-8 left-1/2 -translate-x-1/2 bg-white/85 rounded-full flex items-center gap-0 px-2.5 py-1 shadow-lg z-50 backdrop-blur-xs inset-shadow-xs inset-shadow-white/70"
+	>
+		<!-- Sliding Pill -->
+		<div
+			id="nav-pill"
+			class="absolute bg-[#c6e6fe] rounded-full transition-all duration-300 ease-out -z-10 opacity-0"
+			style="height: calc(100% - 16px); top: 8px;"
+		>
+		</div>
+
+		<a
+			href="#work"
+			class="nav-link relative z-10 text-[#343434] text-sm font-medium font-['Inter'] px-6 py-3 rounded-full transition-colors duration-300 hover:text-[#1f648e]"
+			>Work</a
+		>
+		<a
+			href="#services"
+			class="nav-link relative z-10 text-[#343434] text-sm font-medium font-['Inter'] px-6 py-3 rounded-full transition-colors duration-300 hover:text-[#1f648e]"
+			>Services</a
+		>
+		<a
+			href="#projects"
+			class="nav-link relative z-10 text-[#343434] text-sm font-medium font-['Inter'] px-6 py-3 rounded-full transition-colors duration-300 hover:text-[#1f648e]"
+			>Projects</a
+		>
+		<a
+			href="#about"
+			class="nav-link relative z-10 text-[#343434] text-sm font-medium font-['Inter'] px-6 py-3 rounded-full transition-colors duration-300 hover:text-[#1f648e]"
+			>About</a
+		>
+		<a
+			href="#contact"
+			class="nav-link relative z-10 text-[#343434] text-sm font-medium font-['Inter'] px-6 py-3 rounded-full transition-colors duration-300 hover:text-[#1f648e]"
+			>Contact</a
+		>
+	</nav>
+</header>
+
+<script>
+	const navPill = document.getElementById("nav-pill");
+	const navLinks = document.querySelectorAll(".nav-link");
+	const nav = document.querySelector("nav");
+	let activeLink: HTMLElement | null = null;
+
+	function updatePill(link: HTMLElement) {
+		if (!link || !navPill) return;
+
+		navPill.style.opacity = "1";
+		navPill.style.width = `${link.offsetWidth}px`;
+		navPill.style.left = `${link.offsetLeft}px`;
+	}
+
+	function removePill() {
+		if (!navPill) return;
+		navPill.style.opacity = "0";
+	}
+
+	// Hover effects
+	navLinks.forEach((link) => {
+		const htmlLink = link as HTMLElement;
+		htmlLink.addEventListener("mouseenter", () => {
+			updatePill(htmlLink);
+			htmlLink.classList.add("text-[#1f648e]");
+			htmlLink.classList.remove("text-[#656565]");
+		});
+
+		htmlLink.addEventListener("mouseleave", () => {
+			// If this is not the active link, reset text color
+			if (
+				htmlLink.getAttribute("href") !==
+				activeLink?.getAttribute("href")
+			) {
+				htmlLink.classList.remove("text-[#1f648e]");
+				htmlLink.classList.add("text-[#656565]");
+			}
+		});
+
+		// Smooth scroll on click
+		htmlLink.addEventListener("click", (e) => {
+			e.preventDefault();
+			const href = htmlLink.getAttribute("href");
+			if (href) {
+				const target = document.querySelector(href);
+				if (target) {
+					target.scrollIntoView({ behavior: "smooth" });
+					// Update URL without jumping
+					history.pushState(null, "", href);
+				}
+			}
+		});
+	});
+
+	// Return to active link when leaving nav
+	nav?.addEventListener("mouseleave", () => {
+		if (activeLink) {
+			updatePill(activeLink);
+		} else {
+			removePill();
+		}
+	});
+
+	// Scroll Observer
+	const observerOptions = {
+		root: null,
+		rootMargin: "-50% 0px -50% 0px", // Trigger when section is in middle of viewport
+		threshold: 0,
+	};
+
+	const observer = new IntersectionObserver((entries) => {
+		entries.forEach((entry) => {
+			if (entry.isIntersecting) {
+				const id = entry.target.getAttribute("id");
+				const matchingLink = document.querySelector(
+					`.nav-link[href="#${id}"]`,
+				) as HTMLElement | null;
+
+				if (matchingLink) {
+					// Reset previous active link text color
+					if (activeLink && activeLink !== matchingLink) {
+						activeLink.classList.remove("text-[#1f648e]");
+						activeLink.classList.add("text-[#656565]");
+					}
+
+					activeLink = matchingLink;
+					activeLink.classList.add("text-[#1f648e]");
+					activeLink.classList.remove("text-[#656565]");
+
+					// Only update pill if not currently hovering the nav
+					if (!nav?.matches(":hover")) {
+						updatePill(activeLink);
+					}
+				}
+			}
+		});
+	}, observerOptions);
+
+	document.querySelectorAll("section[id], footer[id]").forEach((section) => {
+		observer.observe(section);
+	});
+</script>

@@ -1,0 +1,106 @@
+---
+const { id } = Astro.props;
+---
+
+<section
+    id={id}
+    class="work-section w-full mx-auto aspect-video overflow-hidden shadow-xl shadow-white/20 transition-all duration-100 ease-out will-change-[width,border-radius,padding]"
+    style="width: 90%; max-width: 72rem; border-radius: 1.5rem;"
+>
+    <iframe
+        title="vimeo-player"
+        src="https://player.vimeo.com/video/804931811?h=e93d790fdc"
+        width="640"
+        height="360"
+        frameborder="0"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+        allowfullscreen
+        class="w-full h-full object-cover"></iframe>
+</section>
+
+<script>
+    const section = document.querySelector(".work-section") as HTMLElement;
+
+    function updateScroll() {
+        if (!section) return;
+
+        const rect = section.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const elementCenter = rect.top + rect.height / 2;
+        const viewportCenter = viewportHeight / 2;
+
+        // Calculate distance from center (absolute value)
+        const distance = Math.abs(viewportCenter - elementCenter);
+
+        // Define the range where the animation happens
+        // Full expansion happens when distance is 0
+        // No expansion when distance is > threshold
+        const threshold = viewportHeight * 0.6;
+
+        // Calculate progress: 1 at center, 0 at threshold
+        let progress = 1 - distance / threshold;
+        progress = Math.max(0, Math.min(1, progress));
+
+        // Apply easing for smoother feel
+        const easedProgress = progress; // Linear for direct mapping, or use easeInOut(progress)
+
+        // Interpolate values
+        // Width: 90% (or max-w-6xl ~ 1152px) -> 100%
+        // We'll use percentage for width to be responsive
+        // Base width: 90% (mobile) to ~70% (desktop max-w-6xl is fixed, but let's say 80% for general case)
+        // Actually, let's interpolate max-width and width
+
+        // Strategy:
+        // Start: width: 90%, max-width: 72rem (1152px), border-radius: 1.5rem (24px)
+        // End: width: 100%, max-width: 100%, border-radius: 0px
+
+        const minWidth = 90; // %
+        const maxWidth = 100; // %
+        const currentWidth = minWidth + (maxWidth - minWidth) * easedProgress;
+
+        const minBorderRadius = 24; // px
+        const maxBorderRadius = 0; // px
+        const currentBorderRadius =
+            minBorderRadius +
+            (maxBorderRadius - minBorderRadius) * easedProgress;
+
+        // We also need to handle the max-width constraint.
+        // At progress 0, max-width should be 72rem. At progress 1, none (or 100vw).
+
+        section.style.width = `${currentWidth}%`;
+        section.style.borderRadius = `${currentBorderRadius}px`;
+
+        if (progress > 0.99) {
+            section.style.maxWidth = "100%";
+        } else {
+            // Interpolate max-width roughly or just keep it unset if width % handles it?
+            // The issue is desktop. 72rem is approx 1152px.
+            // If we just set width to 100%, it will grow.
+            // But we want it to start at max-w-6xl.
+            // Let's set max-width to a large value when expanding?
+            // Simpler: Set max-width to calculated pixel value?
+            // Let's try:
+            // Base: 72rem (1152px)
+            // Target: 100vw
+
+            // Actually, simpler approach:
+            // Always width: 100%
+            // Animate max-width from 72rem to 100vw
+
+            // But 72rem is static. 100vw is dynamic.
+            // Let's use a CSS variable or just calc.
+
+            // Let's stick to the previous logic but handle max-width:
+            // If progress is high, we need to unlock max-width.
+            section.style.maxWidth = `calc(72rem + (100vw - 72rem) * ${easedProgress})`;
+        }
+    }
+
+    window.addEventListener("scroll", () => {
+        requestAnimationFrame(updateScroll);
+    });
+
+    // Initial call
+    updateScroll();
+</script>

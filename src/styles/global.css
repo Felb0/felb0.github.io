@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@layer base {
+
+  *,
+  *::after,
+  *::before {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: var(--font-inter, sans-serif);
+    scroll-behavior: smooth;
+  }
+}
+
+
+:root {
+  /* Colors from Figma */
+  --color-bg-primary: #060606;
+  --color-bg-white: #ffffff;
+  --color-bg-light-blue: #c6e6fe;
+  --color-bg-light-blue-2: #a9deff;
+  --color-bg-medium-blue: #488de8;
+  --color-bg-dark-blue: #156ba8;
+  --color-bg-dark-blue-2: #163848;
+
+  /* Text colors */
+  --color-text-white: #ffffff;
+  --color-text-black: #000000;
+  --color-text-gray: #656565;
+  --color-text-blue: #1f648e;
+  --color-text-blue-light: rgba(255, 255, 255, 0.6);
+
+  /* Gradient colors */
+  --color-gradient-start: #6cd8ff;
+  --color-gradient-end: #5c8bf2;
+
+  /* Font family */
+  --font-inter: 'Inter', sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Border radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-full: 9999px;
+}
+
+
+body {
+  font-family: var(--font-inter);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-white);
+  line-height: 1.6;
+}
+
+/* Inter font is loaded via Google Fonts link in Layout.astro */

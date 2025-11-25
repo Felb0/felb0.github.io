@@ -1,0 +1,30 @@
+---
+import ProjectCard from "./ProjectCard.astro";
+const { id } = Astro.props;
+---
+
+<section
+	id={id}
+	class="w-full max-w-7xl mx-auto flex flex-wrap justify-center gap-10 px-4 md:px-10 py-20 pb-80 relative z-3 bg-[#060606]"
+>
+	<ProjectCard
+		title="Project One"
+		subtitle="Web Design"
+		description="A comprehensive web design project."
+	/>
+	<ProjectCard
+		title="Project Two"
+		subtitle="Mobile App"
+		description="An intuitive mobile application."
+	/>
+	<ProjectCard
+		title="Project Three"
+		subtitle="Branding"
+		description="Complete brand identity overhaul."
+	/>
+	<ProjectCard
+		title="Project Four"
+		subtitle="Marketing"
+		description="Strategic marketing campaign."
+	/>
+</section>

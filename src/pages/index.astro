@@ -1,0 +1,22 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import Services from "../components/Services.astro";
+import Projects from "../components/Projects.astro";
+import About from "../components/About.astro";
+import Footer from "../components/Footer.astro";
+import Work from "../components/Work.astro";
+---
+
+<Layout title="Felb0 - Portfolio">
+	<main class="relative bg-[#060606] w-full flex flex-col gap-0">
+		<Header id="header" />
+		<Hero id="hero" />
+		<Work id="work" />
+		<Services id="services" />
+		<Projects id="projects" />
+		<About id="about" />
+		<Footer id="contact" />
+	</main>
+</Layout>

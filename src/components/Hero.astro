@@ -1,0 +1,71 @@
+---
+const { id } = Astro.props;
+---
+
+<section
+	id={id}
+	class="w-full max-w-7xl mx-auto flex items-center justify-center px-4 md:px-20 py-10 pt-65 pb-55"
+>
+	<h2
+		class="text-white text-4xl md:text-6xl font-medium text-center font-['Inter'] leading-18 flex flex-col items-center gap-0"
+	>
+		<span>Salvando el mundo</span>
+		<span
+			id="hero-text"
+			class="decoration-solid underline-offset-4 bg-linear-to-r from-[#6cd8ff] via-[#5c8bf2] to-[#6cd8ff] bg-size-[200%_auto] bg-clip-text text-transparent animate-gradient inline-block transition-all duration-500 py-0"
+			>una letra</span
+		>
+		<span class="italic font-light">a la vez</span>
+	</h2>
+</section>
+
+<style>
+	@keyframes gradient {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+
+	.animate-gradient {
+		animation: gradient 3s linear infinite;
+	}
+</style>
+
+<script>
+	const words = [
+		"una letra",
+		"un pixel",
+		"un entregable",
+		"un modelo",
+		"un proyecto",
+		"un frame",
+	];
+	let currentIndex = 0;
+	const textElement = document.getElementById("hero-text");
+
+	if (textElement) {
+		setInterval(() => {
+			// Start transition out
+			textElement.classList.add("blur-sm", "opacity-0", "scale-95");
+
+			setTimeout(() => {
+				// Change text
+				currentIndex = (currentIndex + 1) % words.length;
+				textElement.textContent = words[currentIndex];
+
+				// Start transition in
+				textElement.classList.remove(
+					"blur-sm",
+					"opacity-0",
+					"scale-95",
+				);
+			}, 500); // Wait for fade out (matches duration-500)
+		}, 3000); // Change every 3 seconds
+	}
+</script>
