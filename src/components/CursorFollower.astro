@@ -1,0 +1,140 @@
+---
+
+---
+
+<canvas id="cursor-grid" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+<script>
+    const canvas = document.getElementById("cursor-grid") as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let dots: Dot[] = [];
+
+    // Configuration
+    const gap = 25; // Distance between dots
+    const radius = 0.25; // Base radius
+    const hoverRadius = 90; // Interaction radius
+    const maxScale = 12; // Max scale factor
+    const maxDisplacement = 5; // Max pixels dots move towards cursor
+
+    // Colors
+    const colorInactive = { r: 255, g: 255, b: 255 };
+    const colorActive = { r: 21, g: 107, b: 168 };
+
+    const mouse = { x: -1000, y: -1000 };
+    const laggedMouse = { x: -1000, y: -1000 };
+    const lerpFactor = 0.1;
+
+    class Dot {
+        x: number;
+        y: number;
+        baseX: number;
+        baseY: number;
+        targetX: number;
+        targetY: number;
+
+        constructor(x: number, y: number) {
+            this.x = x;
+            this.y = y;
+            this.baseX = x;
+            this.baseY = y;
+            this.targetX = x;
+            this.targetY = y;
+        }
+
+        draw() {
+            if (!ctx) return;
+
+            // Calculate distance to lagged mouse
+            const dx = laggedMouse.x - this.baseX;
+            const dy = laggedMouse.y - this.baseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            let scale = 1;
+            let r = colorInactive.r;
+            let g = colorInactive.g;
+            let b = colorInactive.b;
+            let alpha = 0.55; // Base opacity
+
+            // Calculate target position and visual properties
+            if (distance < hoverRadius && distance > 0) {
+                // Calculate intensity (0 to 1) based on distance
+                const intensity = 1 - distance / hoverRadius;
+
+                // Scale up
+                scale = 1 + intensity * maxScale;
+
+                // Magnetic pull target
+                const pull = intensity * maxDisplacement;
+                this.targetX = this.baseX + (dx / distance) * pull;
+                this.targetY = this.baseY + (dy / distance) * pull;
+
+                // Interpolate color
+                r =
+                    colorInactive.r +
+                    (colorActive.r - colorInactive.r) * intensity;
+                g =
+                    colorInactive.g +
+                    (colorActive.g - colorInactive.g) * intensity;
+                b =
+                    colorInactive.b +
+                    (colorActive.b - colorInactive.b) * intensity;
+                alpha = 0.4 + intensity * 0.6; // Increase opacity
+            } else {
+                this.targetX = this.baseX;
+                this.targetY = this.baseY;
+            }
+
+            // Smoothly move towards target
+            this.x += (this.targetX - this.x) * 0.1;
+            this.y += (this.targetY - this.y) * 0.1;
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, radius * scale, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${Math.floor(r)}, ${Math.floor(g)}, ${Math.floor(b)}, ${alpha})`;
+            ctx.fill();
+        }
+    }
+    function init() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        dots = [];
+        // Create grid
+        for (let x = gap / 2; x < width; x += gap) {
+            for (let y = gap / 2; y < height; y += gap) {
+                dots.push(new Dot(x, y));
+            }
+        }
+    }
+
+    function animate() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, width, height);
+
+        // Update lagged mouse position
+        laggedMouse.x += (mouse.x - laggedMouse.x) * lerpFactor;
+        laggedMouse.y += (mouse.y - laggedMouse.y) * lerpFactor;
+
+        dots.forEach((dot) => {
+            dot.draw();
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    // Event Listeners
+    window.addEventListener("resize", init);
+    window.addEventListener("mousemove", (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+
+    // Start
+    init();
+    animate();
+</script>
