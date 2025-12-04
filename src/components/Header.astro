@@ -4,7 +4,7 @@ const { id } = Astro.props;
 
 <header
 	id={id}
-	class="absolute top-0 left-0 w-full h-auto bg-linear-gradient-to-t from-transparent to-black/15 flex items-center justify-center z-10 p-10 px-20"
+	class="absolute top-0 left-0 w-full h-auto bg-linear-gradient-to-t from-transparent to-black/15 flex items-center justify-center z-10 p-4 md:p-10 px-8 md:px-20"
 >
 	<div class="flex items-center justify-between w-full max-w-7xl mx-auto">
 		<h1 class="text-white text-3xl font-bold leading-normal font-['Inter']">
@@ -28,7 +28,7 @@ const { id } = Astro.props;
 
 	<!-- Fixed navigation menu (outside flex container) -->
 	<nav
-		class="fixed top-8 left-1/2 -translate-x-1/2 bg-white/85 rounded-full flex items-center gap-0 px-2.5 py-1 shadow-lg z-50 backdrop-blur-xs inset-shadow-xs inset-shadow-white/70"
+		class="fixed bottom-8 md:top-8 md:bottom-auto left-1/2 -translate-x-1/2 bg-white/85 rounded-full flex items-center gap-0 px-2.5 py-1 shadow-lg z-50 backdrop-blur-xs inset-shadow-xs inset-shadow-white/70"
 	>
 		<!-- Sliding Pill -->
 		<div
@@ -40,7 +40,7 @@ const { id } = Astro.props;
 
 		<a
 			href="#work"
-			class="nav-link relative z-10 text-[#343434] text-sm font-medium font-['Inter'] px-6 py-3 rounded-full transition-colors duration-300 hover:text-[#1f648e]"
+			class="nav-link relative z-10 text-[#343434] text-sm font-medium font-['Inter'] px-3 md:px-6 py-3 rounded-full transition-colors duration-300 hover:text-[#1f648e]"
 			>Work</a
 		>
 		<a

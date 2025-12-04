@@ -14,7 +14,7 @@
 
     // Configuration
     const gap = 25; // Distance between dots
-    const radius = 0.25; // Base radius
+    const radius = 0.34; // Base radius
     const hoverRadius = 90; // Interaction radius
     const maxScale = 12; // Max scale factor
     const maxDisplacement = 5; // Max pixels dots move towards cursor
@@ -44,7 +44,7 @@
             this.targetY = y;
         }
 
-        draw() {
+        draw(time: number, index: number) {
             if (!ctx) return;
 
             // Calculate distance to lagged mouse
@@ -58,6 +58,11 @@
             let b = colorInactive.b;
             let alpha = 0.55; // Base opacity
 
+            // Breathing effect - subtle floating animation
+            const breatheOffsetX = Math.sin(time + index * 0.1) * 8;
+            const breatheOffsetY = Math.sin(time * 0.7 + index * 0.08) * 8;
+            const breatheScale = 1 + Math.sin(time * 0.5 + index * 0.05) * 0.3;
+
             // Calculate target position and visual properties
             if (distance < hoverRadius && distance > 0) {
                 // Calculate intensity (0 to 1) based on distance
@@ -66,10 +71,12 @@
                 // Scale up
                 scale = 1 + intensity * maxScale;
 
-                // Magnetic pull target
+                // Magnetic pull target WITH breathing animation
                 const pull = intensity * maxDisplacement;
-                this.targetX = this.baseX + (dx / distance) * pull;
-                this.targetY = this.baseY + (dy / distance) * pull;
+                this.targetX =
+                    this.baseX + (dx / distance) * pull + breatheOffsetX;
+                this.targetY =
+                    this.baseY + (dy / distance) * pull + breatheOffsetY;
 
                 // Interpolate color
                 r =
@@ -83,8 +90,10 @@
                     (colorActive.b - colorInactive.b) * intensity;
                 alpha = 0.4 + intensity * 0.6; // Increase opacity
             } else {
-                this.targetX = this.baseX;
-                this.targetY = this.baseY;
+                // Apply breathing offset when not interacting
+                this.targetX = this.baseX + breatheOffsetX;
+                this.targetY = this.baseY + breatheOffsetY;
+                scale = breatheScale;
             }
 
             // Smoothly move towards target
@@ -104,13 +113,39 @@
         canvas.height = height;
 
         dots = [];
-        // Create grid
-        for (let x = gap / 2; x < width; x += gap) {
-            for (let y = gap / 2; y < height; y += gap) {
-                dots.push(new Dot(x, y));
+
+        // Create organic distribution using staggered grid (hexagonal-ish)
+        // This breaks the vertical/horizontal lines
+        const cellSize = gap;
+        const cols = Math.ceil(width / cellSize);
+        const rows = Math.ceil(height / cellSize);
+
+        for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < rows; j++) {
+                // Stagger every odd column
+                let cy = j * cellSize;
+                if (i % 2 === 1) {
+                    cy += cellSize * 0.5;
+                }
+                let cx = i * cellSize;
+
+                // Increased random offset for more organic feel
+                // 0.8 allows dots to move significantly from their grid center
+                const offsetX = (Math.random() - 0.5) * cellSize * 0.8;
+                const offsetY = (Math.random() - 0.5) * cellSize * 0.8;
+
+                const x = cx + cellSize / 2 + offsetX;
+                const y = cy + cellSize / 2 + offsetY;
+
+                // Only add if within bounds
+                if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                    dots.push(new Dot(x, y));
+                }
             }
         }
     }
+
+    let time = 0;
 
     function animate() {
         if (!ctx) return;
@@ -120,8 +155,11 @@
         laggedMouse.x += (mouse.x - laggedMouse.x) * lerpFactor;
         laggedMouse.y += (mouse.y - laggedMouse.y) * lerpFactor;
 
-        dots.forEach((dot) => {
-            dot.draw();
+        // Increment time for breathing effect
+        time += 0.01;
+
+        dots.forEach((dot, index) => {
+            dot.draw(time, index);
         });
 
         requestAnimationFrame(animate);
